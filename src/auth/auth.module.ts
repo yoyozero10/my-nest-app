@@ -8,6 +8,5 @@ import { PassportModule } from '@nestjs/passport';
   imports: [UsersModule, PassportModule.register({ defaultStrategy: 'local' })],
   providers: [AuthService, LocalStrategy],
   exports: [AuthService]
-  //hello
 })
 export class AuthModule { } 
