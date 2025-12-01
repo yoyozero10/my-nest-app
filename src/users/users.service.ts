@@ -2,11 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId } from 'mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User } from './schemas/user.schema';
 import type { UserDocument as UserDocType } from './schemas/user.schema';
 import bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
-import { SoftDeleteModel } from 'mongoose-delete';
 import type { SoftDeleteModel as SoftDeleteModelType } from 'mongoose-delete';
 
 @Injectable()
