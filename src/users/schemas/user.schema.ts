@@ -1,9 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import mongooseDelete, { SoftDeleteDocument } from 'mongoose-delete';
 
-export type UserDocument = HydratedDocument<User>;
+export type UserDocument = HydratedDocument<User> & SoftDeleteDocument;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
   email: string;
@@ -28,6 +29,13 @@ export class User {
 
   @Prop()
   updatedAt: Date;
+
+  @Prop()
+  isDeleted: boolean;
+
+  @Prop()
+  deletedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: 'all' });

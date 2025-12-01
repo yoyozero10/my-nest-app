@@ -1,0 +1,766 @@
+<html lang="en" class="scroll-smooth"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sypha - The AI Engineering Workforce</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body {
+font-family: 'Inter', sans-serif;
+background-color: #02040a; /* Darker blue-black */
+color: #d4d4d4;
+-webkit-font-smoothing: antialiased;
+}
+.glass-card {
+background: rgba(10, 20, 40, 0.4); /* Blue tinted glass */
+border: 1px solid rgba(59, 130, 246, 0.1);
+backdrop-filter: blur(12px);
+position: relative;
+overflow: hidden;
+transition: all 0.3s ease;
+}
+.glass-card:hover {
+border-color: rgba(59, 130, 246, 0.3);
+background: rgba(10, 25, 50, 0.6);
+box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
+}
+.glass-nav {
+background: rgba(2, 4, 10, 0.7);
+backdrop-filter: blur(12px);
+border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+}
+.text-gradient {
+background: linear-gradient(to bottom right, #ffffff, #93c5fd); /* White to Blue */
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+.grid-bg {
+background-size: 40px 40px;
+background-image: linear-gradient(to right, rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+linear-gradient(to bottom, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+-webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+.glow {
+position: absolute;
+width: 800px;
+height: 800px;
+background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0,0,0,0) 70%);
+top: -300px;
+left: 50%;
+transform: translateX(-50%);
+pointer-events: none;
+z-index: 0;
+}
+/* Animations */
+@keyframes scan {
+0% { top: 0%; opacity: 0; }
+10% { opacity: 1; }
+90% { opacity: 1; }
+100% { top: 100%; opacity: 0; }
+}
+@keyframes pulse-blue {
+0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+}
+@keyframes float {
+0%, 100% { transform: translateY(0px); }
+50% { transform: translateY(-5px); }
+}
+.animate-scan {
+animation: scan 2s linear infinite;
+}
+.animate-pulse-blue {
+animation: pulse-blue 2s infinite;
+}
+/* Spotlight Effect Layer */
+.spotlight {
+position: absolute;
+height: 100%;
+width: 100%;
+top: 0;
+left: 0;
+background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(59, 130, 246, 0.06), transparent 40%);
+opacity: 0;
+transition: opacity 0.5s;
+pointer-events: none;
+z-index: 10;
+}
+.glass-card:hover .spotlight {
+opacity: 1;
+}
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+width: 8px;
+}
+::-webkit-scrollbar-track {
+background: #02040a;
+}
+::-webkit-scrollbar-thumb {
+background: #1e3a8a;
+border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+background: #2563eb;
+}
+</style>
+<style>
+/* 3D Transform utilities */
+</style>
+<script>
+// Configure Tailwind to include our custom 3D transform utilities
+tailwind.config = {
+theme: {
+extend: {
+// Add any custom theme extensions here if needed
+}
+},
+plugins: [
+function({ addUtilities }) {
+const rotateXUtilities = {};
+const rotateYUtilities = {};
+const rotateZUtilities = {};
+const rotateValues = [0, 5, 10, 15, 20, 30, 45, 75];
+// Generate rotate-x utilities
+rotateValues.forEach((value) => {
+rotateXUtilities[`.rotate-x-${value}`] = {
+'--tw-rotate-x': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateXUtilities[`.-rotate-x-${value}`] = {
+'--tw-rotate-x': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Generate rotate-y utilities
+rotateValues.forEach((value) => {
+rotateYUtilities[`.rotate-y-${value}`] = {
+'--tw-rotate-y': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateYUtilities[`.-rotate-y-${value}`] = {
+'--tw-rotate-y': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Generate rotate-z utilities
+rotateValues.forEach((value) => {
+rotateZUtilities[`.rotate-z-${value}`] = {
+'--tw-rotate-z': `${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+if (value !== 0) {
+rotateZUtilities[`.-rotate-z-${value}`] = {
+'--tw-rotate-z': `-${value}deg`,
+transform: `
+translate3d(var(--tw-translate-x, 0), var(--tw-translate-y, 0), var(--tw-translate-z, 0))
+rotateX(var(--tw-rotate-x, 0))
+rotateY(var(--tw-rotate-y, 0))
+rotateZ(var(--tw-rotate-z, 0))
+skewX(var(--tw-skew-x, 0))
+skewY(var(--tw-skew-y, 0))
+scaleX(var(--tw-scale-x, 1))
+scaleY(var(--tw-scale-y, 1))
+`.replace(/\\s+/g, ' ').trim(),
+};
+}
+});
+// Perspective utilities
+const perspectiveUtilities = {
+".perspective-none": { perspective: "none" },
+".perspective-dramatic": { perspective: "100px" },
+".perspective-near": { perspective: "300px" },
+".perspective-normal": { perspective: "500px" },
+".perspective-midrange": { perspective: "800px" },
+".perspective-distant": { perspective: "1200px" },
+};
+// Transform style utilities
+const transformStyleUtilities = {
+".transform-style-preserve-3d": { "transform-style": "preserve-3d" },
+".transform-style-flat": { "transform-style": "flat" },
+};
+addUtilities({
+...rotateXUtilities,
+...rotateYUtilities,
+...rotateZUtilities,
+...perspectiveUtilities,
+...transformStyleUtilities,
+});
+}
+]
+};
+</script></head>
+<body class="selection:bg-blue-500/30 selection:text-white relative overflow-x-hidden">
+
+    <!-- Background Grid -->
+    <div class="fixed inset-0 grid-bg z-[-1] pointer-events-none"></div>
+    <div class="glow"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-500/10 rounded flex items-center justify-center border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                    <span class="text-blue-400 font-medium tracking-tight">Sy</span>
+                </div>
+                <span class="text-white font-medium tracking-tight text-sm">Sypha</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
+                <a href="#features" class="hover:text-blue-400 transition-colors duration-200">Features</a>
+                <a href="#how-it-works" class="hover:text-blue-400 transition-colors duration-200">Capabilities</a>
+                <a href="#comparison" class="hover:text-blue-400 transition-colors duration-200">Compare</a>
+                <a href="#pricing" class="hover:text-blue-400 transition-colors duration-200">Pricing</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="#" class="hidden sm:block text-sm font-medium text-neutral-400 hover:text-white transition-colors">Docs</a>
+                <a href="#" class="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-200 flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                    <span>Download</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-32 pb-20 md:pt-48 md:pb-32 px-6 relative">
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-xs font-medium text-blue-200 mb-8 animate-fade-in shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                v1.0 is now available for macOS &amp; Linux
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-medium tracking-tight text-gradient mb-6 leading-[1.1]">
+                The AI Engineering<br>Workforce
+            </h1>
+            
+            <p class="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed mb-10">
+                An open-source, local-first autonomous coding agent. <br class="hidden md:block">
+                Bring your own API keys. Keep your context private. Ship faster.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500 transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.3)] border border-blue-400/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="terminal" class="lucide lucide-terminal w-4 h-4"><path d="M12 19h8"></path><path d="m4 17 6-6-6-6"></path></svg>
+                    Install via Terminal
+                </button>
+                <button class="w-full sm:w-auto px-8 py-3 glass-card text-white font-medium rounded-lg hover:bg-white/5 transition-all duration-200 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="play-circle" class="lucide lucide-play-circle w-4 h-4"><path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    Watch Demo
+                </button>
+            </div>
+
+            <!-- Abstract Visual Interface -->
+            <div class="mt-20 relative mx-auto max-w-4xl border border-blue-500/20 rounded-xl bg-[#02040a] overflow-hidden shadow-[0_0_40px_rgba(30,58,138,0.2)]">
+                <div class="flex items-center gap-2 px-4 py-3 border-b border-blue-500/10 bg-blue-900/[0.05]">
+                    <div class="flex gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                    </div>
+                    <div class="ml-4 text-xs text-blue-300/50 font-mono flex items-center gap-2">
+                        sypha-agent — active task 
+                        <span class="animate-pulse w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    </div>
+                </div>
+                <div class="p-6 font-mono text-sm text-left grid grid-cols-1 md:grid-cols-2 gap-8 relative overflow-hidden">
+                     <!-- Scanline effect -->
+                    <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent animate-scan z-10"></div>
+
+                    <div class="space-y-4">
+                        <div class="text-blue-300 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="bot" class="lucide lucide-bot w-4 h-4 text-blue-400"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
+                            <span class="text-blue-100">AI Engineer Agent</span>
+                        </div>
+                        <div class="pl-4 border-l border-blue-500/20 space-y-2">
+                            <p class="text-cyan-400">-&gt; Analyzing codebase structure...</p>
+                            <p class="text-neutral-400">-&gt; Found 3 potential optimization points in /src/utils</p>
+                            <p class="text-neutral-400">-&gt; Generating test cases for edge scenarios</p>
+                            <div class="flex items-center gap-2 text-blue-400">
+                                <span class="animate-spin text-blue-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                                </span>
+                                Running browser integration tests...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-950/20 rounded border border-blue-500/10 p-4 text-xs text-neutral-400">
+                        <div class="flex justify-between items-center mb-2 pb-2 border-b border-blue-500/10">
+                            <span class="text-blue-200">Context Usage</span>
+                            <span class="text-blue-400 font-bold">128k / 200k</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Project Files</span>
+                                <span class="text-neutral-300">45 files</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Documentation</span>
+                                <span class="text-emerald-400">Active</span>
+                            </div>
+                            <div class="flex justify-between text-indigo-400">
+                                <span>MCP Server</span>
+                                <span class="flex items-center gap-1">Connected <div class="w-1 h-1 rounded-full bg-indigo-400"></div></span>
+                            </div>
+                        </div>
+                        <div class="mt-3 w-full h-1 bg-blue-900/30 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 w-[64%] animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bento Grid Features (Cards Section) -->
+    <section id="features" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-16">
+                <h2 class="text-3xl md:text-4xl font-medium tracking-tight text-white mb-4">Engineered for control.</h2>
+                <p class="text-neutral-400 text-lg max-w-xl">Everything you need to build software autonomously, with deep blue intelligence.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-6" id="cards-container">
+                <!-- Large Card: Agent Mode -->
+                <div class="md:col-span-4 glass-card rounded-2xl p-8 group cursor-default">
+                    <div class="spotlight"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between">
+                            <div class="h-10 w-10 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center mb-6 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:scale-110 transition-transform duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="cpu" class="lucide lucide-cpu w-5 h-5"><path d="M12 20v2"></path><path d="M12 2v2"></path><path d="M17 20v2"></path><path d="M17 2v2"></path><path d="M2 12h2"></path><path d="M2 17h2"></path><path d="M2 7h2"></path><path d="M20 12h2"></path><path d="M20 17h2"></path><path d="M20 7h2"></path><path d="M7 20v2"></path><path d="M7 2v2"></path><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="8" y="8" width="8" height="8" rx="1"></rect></svg>
+                            </div>
+                            <div class="hidden sm:block text-xs font-mono text-blue-500/50 bg-blue-900/10 px-2 py-1 rounded border border-blue-500/10">SYSTEM_ACTIVE</div>
+                        </div>
+                        
+                        <h3 class="text-xl font-medium text-white mb-2 group-hover:text-blue-200 transition-colors">Agent Mode</h3>
+                        <p class="text-neutral-400 leading-relaxed mb-6 max-w-lg">
+                            Sypha doesn't just autocomplete; it builds. Assign complex tasks, and watch the agent navigate your file system autonomously.
+                        </p>
+                        
+                        <!-- Interactive Terminal Visualization -->
+                        <div class="bg-[#050914] rounded-lg p-4 border border-blue-500/10 font-mono text-xs text-neutral-500 overflow-hidden relative group-hover:border-blue-500/30 transition-colors h-32">
+                             <!-- Moving Scan Line -->
+                             <div class="absolute top-0 left-0 w-full h-1 bg-blue-500/50 blur-[2px] opacity-0 group-hover:opacity-100 group-hover:animate-scan transition-opacity"></div>
+                             
+                            <div class="flex gap-2 mb-2 opacity-50">
+                                <div class="w-2 h-2 rounded-full bg-neutral-700"></div>
+                                <div class="w-2 h-2 rounded-full bg-neutral-700"></div>
+                                <div class="w-2 h-2 rounded-full bg-neutral-700"></div>
+                            </div>
+                            <div class="space-y-1">
+                                <div><span class="text-purple-400">user@sypha:~$</span> create a new authentication component</div>
+                                <div class="text-blue-400">agent: <span class="text-neutral-400">Analyzing src/components...</span></div>
+                                <div class="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity delay-100">agent: <span class="text-neutral-400">Creating AuthProvider.tsx...</span></div>
+                                <div class="text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity delay-300">agent: <span class="text-emerald-400">Done in 2.4s.</span></div>
+                                <div class="animate-pulse w-2 h-4 bg-blue-500 inline-block align-middle ml-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medium Card: Context Mastery -->
+                <div class="md:col-span-2 glass-card rounded-2xl p-8 group flex flex-col justify-between overflow-visible">
+                    <div class="spotlight"></div>
+                    <div class="relative z-10">
+                        <div class="h-10 w-10 bg-cyan-500/10 border border-cyan-500/20 rounded-lg flex items-center justify-center mb-6 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)] group-hover:rotate-12 transition-transform duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layers" class="lucide lucide-layers w-5 h-5"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-medium text-white mb-2">Context Mastery</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed mb-4">
+                            Intelligent indexing ensuring the AI understands the full scope.
+                        </p>
+                    </div>
+                    
+                    <!-- Interactive Layer Visual -->
+                    <div class="h-24 relative flex items-center justify-center mt-2 perspective-[1000px]">
+                        <div class="absolute w-20 h-24 bg-blue-900/30 border border-blue-500/20 rounded transform rotate-x-60 translate-y-2 group-hover:translate-y-6 transition-transform duration-500 ease-out z-10 backdrop-blur-sm"></div>
+                        <div class="absolute w-20 h-24 bg-cyan-900/30 border border-cyan-500/20 rounded transform rotate-x-60 translate-y-0 group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 backdrop-blur-sm"></div>
+                        <div class="absolute w-20 h-24 bg-white/5 border border-white/20 rounded transform rotate-x-60 -translate-y-2 group-hover:-translate-y-6 transition-transform duration-500 ease-out z-30 flex items-center justify-center">
+                            <div class="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Small Card: BYO Keys -->
+                <div class="md:col-span-2 glass-card rounded-2xl p-8 group">
+                    <div class="spotlight"></div>
+                    <div class="relative z-10">
+                        <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center justify-center mb-6 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.15)] relative">
+                             <div class="absolute inset-0 bg-indigo-500/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="key" class="lucide lucide-key w-5 h-5 relative z-10"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"></path><path d="m21 2-9.6 9.6"></path><circle cx="7.5" cy="15.5" r="5.5"></circle></svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-2">Use Your API Keys</h3>
+                        <p class="text-neutral-400 text-sm">
+                            Plug in Anthropic, OpenAI, or DeepSeek directly. No markup.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Small Card: Checkpoint System -->
+                <div class="md:col-span-2 glass-card rounded-2xl p-8 group overflow-hidden">
+                    <div class="spotlight"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start">
+                            <div class="h-10 w-10 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center mb-6 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="git-branch" class="lucide lucide-git-branch w-5 h-5"><line x1="6" x2="6" y1="3" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                            </div>
+                            <!-- Git Graph Visual -->
+                            <div class="flex items-center gap-1 mt-1">
+                                <div class="w-2 h-2 rounded-full bg-neutral-600"></div>
+                                <div class="w-6 h-[1px] bg-neutral-600"></div>
+                                <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-2">Checkpoint System</h3>
+                        <p class="text-neutral-400 text-sm">
+                            Safety first. Revert instantly to a clean state.
+                        </p>
+                        
+                        <!-- Timeline scanning line -->
+                        <div class="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent w-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform ease-linear" style="transition-duration: 1.5s"></div>
+                    </div>
+                </div>
+
+                <!-- Medium Card: MCP -->
+                <div class="md:col-span-2 glass-card rounded-2xl p-8 group">
+                    <div class="spotlight"></div>
+                    <div class="relative z-10">
+                        <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center justify-center mb-6 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.15)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="database" class="lucide lucide-database w-5 h-5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-white mb-2">MCP Support</h3>
+                        <p class="text-neutral-400 text-sm mb-4">
+                            Connect Sypha to databases, Slack, or any external tool.
+                        </p>
+                        
+                        <!-- Interactive Nodes -->
+                        <div class="flex items-center justify-center gap-3 mt-4">
+                            <div class="w-3 h-3 rounded-full bg-neutral-700 group-hover:bg-indigo-500 transition-colors duration-300"></div>
+                            <div class="w-12 h-[1px] bg-neutral-800 group-hover:bg-indigo-500/50 transition-colors duration-500"></div>
+                            <div class="w-4 h-4 rounded-full border border-indigo-500/50 flex items-center justify-center animate-pulse-blue">
+                                <div class="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                            </div>
+                            <div class="w-12 h-[1px] bg-neutral-800 group-hover:bg-indigo-500/50 transition-colors duration-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-neutral-700 group-hover:bg-indigo-500 transition-colors duration-300 delay-100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deep Dive: Browser Automation -->
+    <section id="how-it-works" class="py-24 px-6 border-y border-blue-900/10 bg-blue-950/5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
+            <div class="flex-1 space-y-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-xs font-medium text-blue-300">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    Advanced Capabilities
+                </div>
+                <h2 class="text-3xl md:text-4xl font-medium tracking-tight text-white">Browser Automation</h2>
+                <p class="text-lg text-neutral-400 leading-relaxed">
+                    Most coding agents are blind to the frontend output. Sypha includes a headless browser, allowing the agent to run your app, view the rendered DOM, and debug visual issues in real-time.
+                </p>
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3 text-neutral-300 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle-2" class="lucide lucide-check-circle-2 w-5 h-5 text-blue-500 mt-0.5 group-hover:text-blue-400 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                        <span>End-to-End testing generation and execution</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-neutral-300 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle-2" class="lucide lucide-check-circle-2 w-5 h-5 text-blue-500 mt-0.5 group-hover:text-blue-400 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                        <span>Visual regression detection</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-neutral-300 group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle-2" class="lucide lucide-check-circle-2 w-5 h-5 text-blue-500 mt-0.5 group-hover:text-blue-400 transition-colors"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                        <span>Scrape documentation for context</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex-1 w-full">
+                <div class="relative rounded-xl border border-blue-500/20 bg-[#0F0F0F] aspect-video overflow-hidden shadow-[0_0_50px_rgba(30,58,138,0.15)] group">
+                    <!-- Fake Browser Interface -->
+                    <div class="h-8 bg-[#0a0a0a] border-b border-blue-500/10 flex items-center px-4 gap-2">
+                        <div class="flex gap-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-neutral-700"></div>
+                        </div>
+                        <div class="flex-1 bg-blue-900/10 mx-4 h-5 rounded text-[10px] flex items-center px-2 text-blue-400/50 font-mono border border-blue-500/5">localhost:3000</div>
+                    </div>
+                    <div class="p-8 flex items-center justify-center h-full relative">
+                        <!-- Scanning Grid Background -->
+                        <div class="absolute inset-0 bg-[linear-gradient(rgba(30,58,138,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(30,58,138,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                        
+                        <div class="text-center space-y-4 relative z-10">
+                            <div class="w-16 h-16 bg-blue-500/10 rounded-full mx-auto flex items-center justify-center border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.3)] animate-pulse-blue">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye" class="lucide lucide-eye w-8 h-8 text-blue-400"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </div>
+                            <p class="text-sm font-mono text-blue-300">Agent viewing localhost...</p>
+                        </div>
+                    </div>
+                    <!-- Overlay Code -->
+                    <div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur border border-blue-500/20 p-3 rounded text-xs font-mono text-neutral-300 w-64 shadow-xl">
+                        <div class="text-blue-400 mb-1">&gt; Element detected</div>
+                        <div class="text-neutral-500">button.submit-btn is misaligned by 4px. Correcting CSS...</div>
+                        <div class="h-0.5 w-full bg-blue-900/50 mt-2 rounded overflow-hidden">
+                            <div class="h-full bg-blue-500 w-2/3 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section id="comparison" class="py-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-medium tracking-tight text-white mb-4">Why choose Sypha?</h2>
+                <p class="text-neutral-400">The transparent, cost-effective alternative to cloud-based editors.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(59,130,246,0.05)]">
+                <table class="w-full text-left text-sm">
+                    <thead class="">
+                        <tr class="border-b border-blue-500/10 bg-blue-500/5">
+                            <th class="p-6 font-medium text-white w-1/3">Feature</th>
+                            <th class="p-6 font-medium text-blue-400 w-1/3 text-center bg-blue-500/10">Sypha</th>
+                            <th class="p-6 font-medium text-neutral-500 w-1/3 text-center">Cursor / Windsurf</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-blue-500/10">
+                        <tr class="group hover:bg-blue-500/[0.02] transition-colors">
+                            <td class="p-6 font-medium text-neutral-300">Model Cost</td>
+                            <td class="p-6 text-center text-blue-400 font-medium bg-blue-500/[0.02] shadow-[inset_0_0_20px_rgba(59,130,246,0.02)]">At Cost (BYO Keys)</td>
+                            <td class="p-6 text-center text-neutral-500">Subscription Markup</td>
+                        </tr>
+                        <tr class="group hover:bg-blue-500/[0.02] transition-colors">
+                            <td class="p-6 font-medium text-neutral-300">Privacy</td>
+                            <td class="p-6 text-center text-blue-400 font-medium bg-blue-500/[0.02] shadow-[inset_0_0_20px_rgba(59,130,246,0.02)]">Local-First</td>
+                            <td class="p-6 text-center text-neutral-500">Cloud Relay</td>
+                        </tr>
+                        <tr class="group hover:bg-blue-500/[0.02] transition-colors">
+                            <td class="p-6 font-medium text-neutral-300">Agent Capabilities</td>
+                            <td class="p-6 text-center text-white bg-blue-500/[0.02] shadow-[inset_0_0_20px_rgba(59,130,246,0.02)]">Autonomous Agent</td>
+                            <td class="p-6 text-center text-neutral-500">Copilot / Autocomplete</td>
+                        </tr>
+                        <tr class="group hover:bg-blue-500/[0.02] transition-colors">
+                            <td class="p-6 font-medium text-neutral-300">Context Window</td>
+                            <td class="p-6 text-center text-white bg-blue-500/[0.02] shadow-[inset_0_0_20px_rgba(59,130,246,0.02)]">Unlimited (Local RAG)</td>
+                            <td class="p-6 text-center text-neutral-500">Limited / Tiered</td>
+                        </tr>
+                        <tr class="group hover:bg-blue-500/[0.02] transition-colors">
+                            <td class="p-6 font-medium text-neutral-300">Lock-in</td>
+                            <td class="p-6 text-center text-blue-400 font-medium bg-blue-500/[0.02] shadow-[inset_0_0_20px_rgba(59,130,246,0.02)]">None (Open Source)</td>
+                            <td class="p-6 text-center text-neutral-500">Proprietary Ecosystem</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-medium tracking-tight text-white mb-4">Transparent Pricing</h2>
+                <p class="text-neutral-400">Free to start. Pay for advanced features, not for tokens.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Free Plan -->
+                <div class="glass-card rounded-2xl p-8 border border-blue-500/10 flex flex-col hover:border-blue-500/30 transition-colors">
+                    <div class="mb-8">
+                        <h3 class="text-xl font-medium text-white mb-2">Community</h3>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-medium text-white">$0</span>
+                            <span class="text-neutral-500">/forever</span>
+                        </div>
+                        <p class="text-neutral-400 text-sm mt-4">For hobbyists and open source contributors.</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-neutral-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-neutral-500"><path d="M20 6 9 17l-5-5"></path></svg>
+                            Basic Code Editing Agent
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-neutral-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-neutral-500"><path d="M20 6 9 17l-5-5"></path></svg>
+                            Local File Access
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-neutral-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-neutral-500"><path d="M20 6 9 17l-5-5"></path></svg>
+                            Bring Your Own Keys
+                        </li>
+                    </ul>
+                    <a href="#" class="w-full block text-center py-2.5 rounded-lg border border-white/20 text-white font-medium hover:bg-white/5 transition-colors">Download Free</a>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="relative bg-gradient-to-br from-blue-50 to-white text-black rounded-2xl p-8 flex flex-col shadow-[0_0_40px_rgba(59,130,246,0.2)] transform hover:scale-[1.01] transition-transform duration-300">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] uppercase tracking-wider font-semibold px-3 py-1 rounded-full border border-blue-400">
+                        Most Popular
+                    </div>
+                    <div class="mb-8">
+                        <h3 class="text-xl font-medium text-black mb-2">Power User</h3>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-medium text-black">$19</span>
+                            <span class="text-neutral-600">/month</span>
+                        </div>
+                        <p class="text-neutral-600 text-sm mt-4">For professional engineers and teams.</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-neutral-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-blue-600"><path d="M20 6 9 17l-5-5"></path></svg>
+                            Everything in Free
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-neutral-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-blue-600"><path d="M20 6 9 17l-5-5"></path></svg>
+                            Full Browser Automation
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-neutral-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-4 h-4 text-blue-600"><path d="M20 6 9 17l-5-5"></path></svg>
+                            MCP Server Integrations
+                        </li>
+                        
+                    </ul>
+                    <a href="#" class="w-full block text-center py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-blue-900/10 bg-[#010205] pt-16 pb-8 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-blue-500/10 rounded flex items-center justify-center border border-blue-500/20">
+                            <span class="text-blue-400 text-xs font-medium tracking-tight">Sy</span>
+                        </div>
+                        <span class="text-white font-medium tracking-tight text-sm">Sypha</span>
+                    </div>
+                    <p class="text-neutral-500 text-sm">
+                        Building the future of autonomous software engineering.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-medium text-sm mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-neutral-500">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Download</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Changelog</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Docs</a></li>
+                        
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-medium text-sm mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-neutral-500">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Community</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">GitHub</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                        
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-medium text-sm mb-4">Social</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-neutral-500 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="twitter" class="lucide lucide-twitter w-5 h-5"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                        </a>
+                        <a href="#" class="text-neutral-500 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="github" class="lucide lucide-github w-5 h-5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                        </a>
+                        <a href="#" class="text-neutral-500 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="disc" class="lucide lucide-disc w-5 h-5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-blue-900/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-neutral-600 text-xs">© 2024 Sypha AI Inc. All rights reserved.</p>
+                <div class="flex items-center gap-2 text-xs text-neutral-600">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    <span>All systems operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Spotlight Effect Script
+        const cards = document.querySelectorAll(".glass-card");
+        document.getElementById("cards-container").onmousemove = e => {
+            for(const card of cards) {
+                const rect = card.getBoundingClientRect(),
+                      x = e.clientX - rect.left,
+                      y = e.clientY - rect.top;
+
+                card.style.setProperty("--mouse-x", `${x}px`);
+                card.style.setProperty("--mouse-y", `${y}px`);
+            };
+        }
+    </script>
+
+</body></html>

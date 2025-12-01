@@ -1,14 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, isValidObjectId } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { isValidObjectId } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import type { UserDocument as UserDocType } from './schemas/user.schema';
 import bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SoftDeleteModel } from 'mongoose-delete';
+import type { SoftDeleteModel as SoftDeleteModelType } from 'mongoose-delete';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) { }
+  constructor(@InjectModel(User.name) private readonly userModel: SoftDeleteModelType<UserDocType>) { }
 
   hashPassword = (password: string) => {
     const salt = bcrypt.genSaltSync(10);
@@ -61,7 +64,7 @@ export class UsersService {
       throw new NotFoundException('Invalid user id');
     }
 
-    const user = await this.userModel.findByIdAndDelete(id).lean();
+    const user = await this.userModel.delete({ _id: id });
     if (!user) {
       throw new NotFoundException('User not found');
     }
