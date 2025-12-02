@@ -9,16 +9,16 @@ export class AppController {
     private readonly authService: AuthService
   ) { }
 
-  @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  handeLogin(@Req() req) {
-    return this.authService.login(req.user);
-  }
+  // @Public()
+  // @UseGuards(LocalAuthGuard)
+  // @Post('login')
+  // handeLogin(@Req() req) {
+  //   return this.authService.login(req.user);
+  // }
 
-  @Get('profile')
-  getProfile(@Req() req) {
-    return req.user;
-  }
+  // @Get('profile')
+  // getProfile(@Req() req) {
+  //   return req.user;
+  // }
 
 }

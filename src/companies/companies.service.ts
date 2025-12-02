@@ -5,15 +5,23 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Company } from './schemas/company.schema';
 import type { CompanyDocument as CompanyDocType } from './schemas/company.schema';
 import type { SoftDeleteModel as SoftDeleteModelType } from 'mongoose-delete';
-import { isValidObjectId } from 'mongoose';
+import { isValidObjectId, Types } from 'mongoose';
+import { IUser } from 'src/users/users.interface';
+
 
 @Injectable()
 export class CompaniesService {
 
   constructor(@InjectModel(Company.name) private readonly companyModel: SoftDeleteModelType<CompanyDocType>) { }
 
-  create(createCompanyDto: CreateCompanyDto) {
-    return this.companyModel.create(createCompanyDto);
+  create(createCompanyDto: CreateCompanyDto, user: IUser) {
+    return this.companyModel.create({
+      ...createCompanyDto,
+      createdBy: {
+        _id: new Types.ObjectId(user._id),
+        email: user.email,
+      },
+    });
   }
 
   findAll() {

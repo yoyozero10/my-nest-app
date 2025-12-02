@@ -10,6 +10,8 @@ import {
 import { CompaniesService } from './companies.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateCompanyDto } from './dto/create-company.dto';
+import { User } from 'src/decorator/customize';
+import type { IUser } from 'src/users/users.interface';
 
 @Controller('companies')
 export class CompaniesController {
@@ -17,8 +19,10 @@ export class CompaniesController {
 
   @Post()
   create(
-    @Body() createCompanyDto: CreateCompanyDto) {
-      return this.companiesService.create(createCompanyDto);
+    @Body() createCompanyDto: CreateCompanyDto,
+    @User() user: IUser
+  ) {
+    return this.companiesService.create(createCompanyDto, user);
   }
 
   @Get()
