@@ -1,11 +1,12 @@
-import { IsEmail, IsString, IsNotEmpty, IsObject, ValidateNested, IsNotEmptyObject } from "class-validator";
+import { IsEmail, IsString, IsNotEmpty, IsObject, ValidateNested, IsNotEmptyObject, IsOptional, IsNumber, Min, IsIn } from "class-validator";
 import mongoose from "mongoose";
 import { Type } from "class-transformer";
 
 class Company {
-    @IsNotEmpty({ message: "Company is required" })
+    @IsNotEmpty({ message: "Company _id is required" })
     _id: mongoose.Schema.Types.ObjectId;
     @IsNotEmpty({ message: "Company name is required" })
+    @IsString()
     name: string;
 }
 
@@ -13,25 +14,33 @@ export class CreateUserDto {
     @IsString()
     @IsNotEmpty({ message: "Name is required" })
     name: string;
-    @IsEmail()
+    
+    @IsEmail({}, { message: "Email must be a valid email address" })
     @IsNotEmpty({ message: "Email is required" })
     email: string;
+    
     @IsString()
     @IsNotEmpty({ message: "Password is required" })
     password: string;
+    
+    @IsOptional()
+    @IsNumber({}, { message: "Age must be a number" })
+    @Min(0, { message: "Age must be greater than 0" })
+    age?: number;
+    
+    @IsOptional()
     @IsString()
-    @IsNotEmpty({ message: "Phone is required" })
-    phone: string;
-    @IsNotEmpty({ message: "Age is required" })
-    age: number;
+    gender?: string;
+    
+    @IsOptional()
     @IsString()
-    @IsNotEmpty({ message: "Gender is required" })
-    gender: string;
+    address?: string;
+    
     @IsString()
-    @IsNotEmpty({ message: "Address is required" })
-    address: string;
     @IsNotEmpty({ message: "Role is required" })
+    @IsIn(['USER', 'ADMIN'], { message: "Role must be either USER or ADMIN" })
     role: string;
+    
     @IsNotEmptyObject()
     @IsObject()
     @ValidateNested()

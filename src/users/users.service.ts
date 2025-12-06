@@ -1,16 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { User as UserModel } from './schemas/user.schema';
 import type { UserDocument as UserDocType } from './schemas/user.schema';
 import bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import type { SoftDeleteModel as SoftDeleteModelType } from 'mongoose-delete';
+import { IUser } from './users.interface';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private readonly userModel: SoftDeleteModelType<UserDocType>) { }
+  constructor(@InjectModel(UserModel.name) private readonly userModel: SoftDeleteModelType<UserDocType>) { }
 
   hashPassword = (password: string) => {
     const salt = bcrypt.genSaltSync(10);
@@ -18,10 +19,31 @@ export class UsersService {
     return hash;
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, user: IUser) {
+    // Kiểm tra email đã tồn tại
+    const emailExists = await this.checkEmailExists(createUserDto.email);
+    if (emailExists) {
+      throw new ConflictException('Email already exists');
+    }
+
+    // Hash password
     const hashPassword = this.hashPassword(createUserDto.password);
-    const user = await this.userModel.create({ ...createUserDto, password: hashPassword });
-    return user;
+    
+    // Tạo user với createdBy từ JWT token
+    const newUser = await this.userModel.create({
+      ...createUserDto,
+      password: hashPassword,
+      createdBy: {
+        _id: user._id,
+        email: user.email,
+      },
+    });
+    
+    // Trả về chỉ _id và createdAt
+    return {
+      _id: newUser._id,
+      createdAt: newUser.createdAt,
+    };
   }
 
   async register(name: string, email: string, hashedPassword: string) {
