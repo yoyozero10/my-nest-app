@@ -12,6 +12,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { User } from 'src/decorator/customize';
 import type { IUser } from 'src/users/users.interface';
+import { Query } from '@nestjs/common';
 
 @Controller('companies')
 export class CompaniesController {
@@ -26,8 +27,15 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll() {
-    return this.companiesService.findAll();
+  findAll(
+    @Query("page") page: number,
+    @Query("limit") limit: number,
+    @Query("search") search?: string,
+    @Query("name") name?: string,
+    @Query("address") address?: string,
+    @Query("description") description?: string,
+  ) {
+    return this.companiesService.findAll(page,limit, { search, name, address, description });
   }
 
   @Get(':id')
