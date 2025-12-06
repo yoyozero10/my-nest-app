@@ -43,8 +43,17 @@ export class UsersController {
   }
 
   @Patch()
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+  @HttpCode(HttpStatus.OK)
+  async update(
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: IUser,
+  ) {
+    const data = await this.usersService.update(updateUserDto, user);
+    return {
+      statusCode: 200,
+      message: 'Update a User',
+      data,
+    };
   }
 
   @Delete(':id')

@@ -28,7 +28,7 @@ export class UsersService {
 
     // Hash password
     const hashPassword = this.hashPassword(createUserDto.password);
-    
+
     // Tạo user với createdBy từ JWT token
     const newUser = await this.userModel.create({
       ...createUserDto,
@@ -38,7 +38,7 @@ export class UsersService {
         email: user.email,
       },
     });
-    
+
     // Trả về chỉ _id và createdAt
     return {
       _id: newUser._id,
@@ -90,9 +90,35 @@ export class UsersService {
     return bcrypt.compareSync(password, hashPassword);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(updateUserDto: UpdateUserDto) {
-    return await this.userModel.findByIdAndUpdate(updateUserDto._id, updateUserDto, { new: true }).exec();
+  async update(updateUserDto: UpdateUserDto, user: IUser) {
+    // Validate _id
+    if (!isValidObjectId(updateUserDto._id)) {
+      throw new NotFoundException('Invalid user id');
+    }
+
+    // Check if user exists
+    const existingUser = await this.userModel.findById(updateUserDto._id).lean();
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Prepare update data with updatedBy
+    const { _id, ...updateData } = updateUserDto;
+    const dataToUpdate = {
+      ...updateData,
+      updatedBy: {
+        _id: user._id,
+        email: user.email,
+      },
+    };
+
+    // Update and return MongoDB update result
+    const result = await this.userModel.updateOne(
+      { _id: updateUserDto._id },
+      dataToUpdate
+    ).exec();
+
+    return result;
   }
 
   async remove(id: string) {

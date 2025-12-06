@@ -15,6 +15,15 @@ export class User {
   @Prop()
   name: string;
 
+  @Prop()
+  age: number;
+
+  @Prop()
+  gender: string;
+
+  @Prop()
+  address: string;
+
   @Prop({ type: Object })
   company: {
     _id: mongoose.Schema.Types.ObjectId;
