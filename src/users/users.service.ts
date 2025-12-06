@@ -24,6 +24,16 @@ export class UsersService {
     return user;
   }
 
+  async register(name: string, email: string, hashedPassword: string) {
+    const user = await this.userModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'USER',
+    });
+    return user;
+  }
+
   findAll() {
     return this.userModel.find().lean();
   }
@@ -47,6 +57,11 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async checkEmailExists(email: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ email }).lean();
+    return !!user;
   }
 
   checkUserPassword(password: string, hashPassword: string) {
