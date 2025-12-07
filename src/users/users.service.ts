@@ -56,8 +56,23 @@ export class UsersService {
     return user;
   }
 
-  findAll() {
-    return this.userModel.find().lean();
+  async findAll(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    
+    const [users, total] = await Promise.all([
+      this.userModel.find().select('-password').skip(skip).limit(limit).lean(),
+      this.userModel.countDocuments()
+    ]);
+
+    return {
+      meta: {
+        current: page,
+        pageSize: limit,
+        pages: Math.ceil(total / limit),
+        total
+      },
+      result: users
+    };
   }
 
   async findOne(id: string) {
@@ -65,7 +80,7 @@ export class UsersService {
       throw new NotFoundException('Invalid user id');
     }
 
-    const user = await this.userModel.findById(id).lean();
+    const user = await this.userModel.findById(id).select('-password').lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -103,6 +118,7 @@ export class UsersService {
     }
 
     // Prepare update data with updatedBy
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, ...updateData } = updateUserDto;
     const dataToUpdate = {
       ...updateData,

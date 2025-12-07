@@ -8,6 +8,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -33,13 +34,32 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @HttpCode(HttpStatus.OK)
+  async findAll(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @User() user: IUser,
+  ) {
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 10;
+    
+    const data = await this.usersService.findAll(pageNum, limitNum);
+    return {
+      statusCode: 200,
+      message: 'Fetch user with paginate',
+      data
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.usersService.findOne(id);
+    return {
+      statusCode: 200,
+      message: 'Fetch user by id',
+      data
+    };
   }
 
   @Patch()
