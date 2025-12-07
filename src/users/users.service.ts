@@ -121,16 +121,31 @@ export class UsersService {
     return result;
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: IUser) {
     if (!isValidObjectId(id)) {
       throw new NotFoundException('Invalid user id');
     }
 
-    const user = await this.userModel.delete({ _id: id });
-    if (!user) {
+    // Check if user exists
+    const existingUser = await this.userModel.findById(id).lean();
+    if (!existingUser) {
       throw new NotFoundException('User not found');
     }
 
-    return "User with id: " + id + " deleted successfully";
+    // Update deletedBy first, then perform soft delete
+    await this.userModel.updateOne(
+      { _id: id },
+      { 
+        deletedBy: {
+          _id: user._id,
+          email: user.email,
+        }
+      }
+    ).exec();
+
+    // Perform soft delete
+    const result = await this.userModel.delete({ _id: id });
+
+    return result;
   }
 }
