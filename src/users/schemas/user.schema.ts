@@ -12,7 +12,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop()
+  @Prop({ required: true, default: 'User' })
   name: string;
 
   @Prop()
@@ -30,7 +30,7 @@ export class User {
     name: string;
   }
 
-  @Prop()
+  @Prop({ required: true, default: 'USER' })
   role: string;
 
   @Prop()

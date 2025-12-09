@@ -5,6 +5,7 @@ import { IUser } from 'src/users/users.interface';
 import { RegisterDto } from './dto/register.dto';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
+import { response, type Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,8 @@ export class AuthService {
         }
         return null;
     }
-    async login(user: IUser) {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async login(user: IUser, response: Response) {
         const { _id, name, email, role } = user;
         const payload = {
             sub: "token login",
@@ -46,6 +48,7 @@ export class AuthService {
         const refreshToken = this.createRefreshToken(refreshTokenPayload);
 
         return {
+            response,
             access_token: this.jwtService.sign(accessTokenPayload),
             refreshToken,
             _id,
@@ -79,9 +82,83 @@ export class AuthService {
     createRefreshToken = (payload: any) => {
         const refreshToken = this.jwtService.sign(payload, {
             secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-            expiresIn: ms(this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRED') as StringValue) / 1000,
+            expiresIn: this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRED') as StringValue,
         });
         return refreshToken;
     }
-}
 
+    refreshToken = async (refreshToken: string, response: Response) => {
+        try {
+            // Verify refresh token with refresh secret
+            const payload = this.jwtService.verify(refreshToken, {
+                secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+            });
+
+            // Find user from database
+            const user = await this.usersService.findOne(payload._id);
+
+            // Create new access token
+            const accessTokenPayload = {
+                sub: "token login",
+                iss: "from server",
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                type: 'access'
+            };
+            // Create new refresh token with fresh user data
+            const newRefreshTokenPayload = {
+                sub: "token login",
+                iss: "from server",
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                type: 'refresh'
+            };
+
+            // Set new refresh token cookie
+            response.clearCookie('refreshToken');
+            const newRefreshToken = this.createRefreshToken(newRefreshTokenPayload);
+            response.cookie('refreshToken', newRefreshToken, {
+                httpOnly: true,
+                maxAge: ms(this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRED') as StringValue),
+            });
+
+            return {
+                access_token: this.jwtService.sign(accessTokenPayload),
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role
+                }
+            };
+        } catch (error) {
+            console.error('Refresh token error:', error.message || error);
+            throw new Error('Invalid refresh token');
+        }
+    }
+
+    logout = async (refreshToken: string) => {
+        try {
+            // Verify refresh token with refresh secret
+            const payload = this.jwtService.verify(refreshToken, {
+                secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+            });
+
+            // Remove refresh token from user using updateUserToken
+            await this.usersService.updateUserToken('', payload._id);
+
+            return {
+                statusCode: 200,
+                message: 'User Logout',
+                data: null
+            };
+        } catch (error) {
+            console.error('Logout error:', error.message || error);
+            throw new Error('Invalid refresh token');
+        }
+    }
+}

@@ -58,7 +58,7 @@ export class UsersService {
 
   async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
-    
+
     const [users, total] = await Promise.all([
       this.userModel.find().select('-password').skip(skip).limit(limit).lean(),
       this.userModel.countDocuments()
@@ -151,7 +151,7 @@ export class UsersService {
     // Update deletedBy first, then perform soft delete
     await this.userModel.updateOne(
       { _id: id },
-      { 
+      {
         deletedBy: {
           _id: user._id,
           email: user.email,
@@ -166,9 +166,9 @@ export class UsersService {
   }
 
   updateUserToken = async (refreshToken: string, _id: string) => {
-    return await  this.userModel.updateOne(
-      {_id},
-      {refreshToken}
+    return await this.userModel.updateOne(
+      { _id },
+      { refreshToken }
     )
   }
 }
