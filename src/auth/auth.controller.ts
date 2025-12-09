@@ -3,11 +3,13 @@ import { AuthService } from './auth.service';
 import { Public } from '../decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterDto } from './dto/register.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller("auth")
 export class AuthController {
     constructor(
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly userService: UsersService
     ) { }
 
     @Public()
@@ -24,12 +26,28 @@ export class AuthController {
     @Public()
     @UseGuards(LocalAuthGuard)
     @Post('login')
-    handeLogin(@Req() req) {
-        return this.authService.login(req.user);
+    @HttpCode(HttpStatus.CREATED)
+    async handeLogin(@Req() req) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        const data = await this.authService.login(req.user);
+        await this.userService.updateUserToken(data.refreshToken, data._id);
+        return {
+            statusCode: 201,
+            message: 'User Login',
+            data: {
+                access_token: data.access_token,
+                user: {
+                    _id: data._id,
+                    name: data.name,
+                    email: data.email
+                }
+            }
+        };
     }
 
     @Get('profile')
     getProfile(@Req() req) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
         return req.user;
     }
 }

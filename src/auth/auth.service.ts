@@ -3,11 +3,16 @@ import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/users/users.interface';
 import { RegisterDto } from './dto/register.dto';
-
+import { ConfigService } from '@nestjs/config';
+import ms, { StringValue } from 'ms';
 
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService, private jwtService: JwtService) { }
+    constructor(
+        private usersService: UsersService,
+        private jwtService: JwtService,
+        private configService: ConfigService,
+    ) { }
     async validateUser(username: string, pass: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(username);
         if (user && this.usersService.checkUserPassword(pass, user.password)) {
@@ -25,8 +30,24 @@ export class AuthService {
             email,
             role
         };
+
+        // Create refresh token with different payload
+        const refreshTokenPayload = {
+            ...payload,
+            type: 'refresh'
+        };
+
+        // Create access token with type
+        const accessTokenPayload = {
+            ...payload,
+            type: 'access'
+        };
+
+        const refreshToken = this.createRefreshToken(refreshTokenPayload);
+
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: this.jwtService.sign(accessTokenPayload),
+            refreshToken,
             _id,
             name,
             email,
@@ -54,4 +75,13 @@ export class AuthService {
             createdAt: user.createdAt,
         };
     }
+
+    createRefreshToken = (payload: any) => {
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+            expiresIn: ms(this.configService.getOrThrow<string>('JWT_REFRESH_EXPIRED') as StringValue) / 1000,
+        });
+        return refreshToken;
+    }
 }
+
