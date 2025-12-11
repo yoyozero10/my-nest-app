@@ -28,14 +28,14 @@ export class CompaniesController {
 
   @Get()
   findAll(
-    @Query("page") page: number,
-    @Query("limit") limit: number,
+    @Query("current") page: number,
+    @Query("pageSize") limit: number,
     @Query("search") search?: string,
     @Query("name") name?: string,
     @Query("address") address?: string,
     @Query("description") description?: string,
   ) {
-    return this.companiesService.findAll(page,limit, { search, name, address, description });
+    return this.companiesService.findAll(page, limit, { search, name, address, description });
   }
 
   @Get(':id')

@@ -4,9 +4,11 @@ import {
     Injectable,
     NestInterceptor,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { RESPONSE_MESSAGE } from 'src/decorator/customize';
 
 interface HandlerPayload<T> {
     data?: T;
@@ -29,6 +31,8 @@ export interface ResponseEnvelope<T> {
 @Injectable()
 export class TransformInterceptor<T>
     implements NestInterceptor<T, ResponseEnvelope<T>> {
+    constructor(private reflector: Reflector) { }
+
     intercept(
         context: ExecutionContext,
         next: CallHandler<T>,
@@ -48,9 +52,14 @@ export class TransformInterceptor<T>
                     ? payload
                     : { data: payload };
 
+                const responseMessage = this.reflector.get<string>(
+                    RESPONSE_MESSAGE,
+                    context.getHandler(),
+                ) ?? normalized.message ?? 'Success';
+
                 return {
                     statusCode: response.statusCode,
-                    message: normalized.message ?? 'Success',
+                    message: responseMessage,
                     data: (normalized.data ?? payload) as T,
                     meta: normalized.meta,
                     path: request.originalUrl ?? request.url,

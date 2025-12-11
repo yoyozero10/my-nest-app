@@ -18,16 +18,16 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(new TransformInterceptor(reflection));
   app.use(cookieParser());
   app.enableCors({
-    origin: configService.get('CORS_ORIGIN'),
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 200,
     credentials: true,
   });
-  
+
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,

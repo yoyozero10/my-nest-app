@@ -36,14 +36,14 @@ export class UsersController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async findAll(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+    @Query('current') page: string = '1',
+    @Query('pageSize') limit: string = '10',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @User() user: IUser,
   ) {
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
-    
+
     const data = await this.usersService.findAll(pageNum, limitNum);
     return {
       statusCode: 200,
