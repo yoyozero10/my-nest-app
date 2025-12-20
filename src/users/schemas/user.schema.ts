@@ -30,8 +30,8 @@ export class User {
     name: string;
   }
 
-  @Prop({ required: true, default: 'USER' })
-  role: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Role' })
+  role: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   refreshToken: string;

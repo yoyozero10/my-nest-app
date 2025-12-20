@@ -8,10 +8,14 @@ import bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import type { SoftDeleteModel as SoftDeleteModelType } from 'mongoose-delete';
 import { IUser } from './users.interface';
+import { RolesService } from '../roles/roles.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(UserModel.name) private readonly userModel: SoftDeleteModelType<UserDocType>) { }
+  constructor(
+    @InjectModel(UserModel.name) private readonly userModel: SoftDeleteModelType<UserDocType>,
+    private readonly rolesService: RolesService
+  ) { }
 
   hashPassword = (password: string) => {
     const salt = bcrypt.genSaltSync(10);
@@ -47,11 +51,14 @@ export class UsersService {
   }
 
   async register(name: string, email: string, hashedPassword: string) {
+    // Tìm role "USER" mặc định
+    const userRole = await this.rolesService.findByName('USER');
+
     const user = await this.userModel.create({
       name,
       email,
       password: hashedPassword,
-      role: 'USER',
+      role: userRole?._id || null,
     });
     return user;
   }
@@ -80,7 +87,17 @@ export class UsersService {
       throw new NotFoundException('Invalid user id');
     }
 
-    const user = await this.userModel.findById(id).select('-password').lean();
+    const user = await this.userModel
+      .findById(id)
+      .select('-password')
+      .populate({
+        path: 'role',
+        populate: {
+          path: 'permissions',
+          select: '_id name apiPath module method'
+        }
+      })
+      .lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -89,7 +106,16 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    const user = await this.userModel.findOne({ email }).lean();
+    const user = await this.userModel
+      .findOne({ email })
+      .populate({
+        path: 'role',
+        populate: {
+          path: 'permissions',
+          select: '_id name apiPath module method'
+        }
+      })
+      .lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -137,7 +163,7 @@ export class UsersService {
     return result;
   }
 
-  async remove(id: string, user: IUser) {
+  async remove(id: string, user: IUser): Promise<any> {
     if (!isValidObjectId(id)) {
       throw new NotFoundException('Invalid user id');
     }

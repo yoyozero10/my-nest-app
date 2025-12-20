@@ -44,8 +44,11 @@ export class CompaniesController {
   }
 
   @Patch()
-  update(@Body() updateCompanyDto: UpdateCompanyDto) {
-    return this.companiesService.update(updateCompanyDto);
+  update(
+    @Body() updateCompanyDto: UpdateCompanyDto,
+    @User() user: IUser
+  ) {
+    return this.companiesService.update(updateCompanyDto, user);
   }
 
   @Delete(':id')

@@ -51,10 +51,13 @@ export class AuthService {
             response,
             access_token: this.jwtService.sign(accessTokenPayload),
             refreshToken,
-            _id,
-            name,
-            email,
-            role
+            user: {
+                _id,
+                name,
+                email,
+                role,
+                permissions: role?.permissions || []
+            }
         };
     }
     async register(registerDto: RegisterDto) {
@@ -95,7 +98,7 @@ export class AuthService {
             });
 
             // Find user from database
-            const user = await this.usersService.findOne(payload._id);
+            const user = await this.usersService.findOne(payload._id) as any;
 
             // Create new access token
             const accessTokenPayload = {
@@ -132,7 +135,8 @@ export class AuthService {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
+                    permissions: user.role?.permissions || []
                 }
             };
         } catch (error) {

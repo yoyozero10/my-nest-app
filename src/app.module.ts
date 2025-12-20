@@ -11,6 +11,10 @@ import softDeletePlugin from 'mongoose-delete';
 import { Connection } from 'mongoose';
 import { JobsModule } from './jobs/jobs.module';
 import { FilesModule } from './files/files.module';
+import { ResumesModule } from './resumes/resumes.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
+import { DatabasesModule } from './databases/databases.module';
 
 @Module({
   imports: [
@@ -33,6 +37,10 @@ import { FilesModule } from './files/files.module';
     CompaniesModule,
     JobsModule,
     FilesModule,
+    ResumesModule,
+    PermissionsModule,
+    RolesModule,
+    DatabasesModule,
   ],
   providers: [
     AppService

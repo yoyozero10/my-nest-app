@@ -50,7 +50,7 @@ export class JobsController {
   async remove(
     @Param('id') id: string,
     @User() user: IUser
-  ) {
+  ): Promise<any> {
     return await this.jobsService.remove(id, user);
   }
 }

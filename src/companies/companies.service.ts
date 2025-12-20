@@ -90,11 +90,22 @@ export class CompaniesService {
     return company;
   }
 
-  update(updateCompanyDto: UpdateCompanyDto) {
-    return this.companyModel.findByIdAndUpdate(updateCompanyDto._id, updateCompanyDto, { new: true }).exec();
+  update(updateCompanyDto: UpdateCompanyDto, user: IUser) {
+    const { _id, ...updateData } = updateCompanyDto;
+    return this.companyModel.findByIdAndUpdate(
+      _id,
+      {
+        ...updateData,
+        updatedBy: {
+          _id: new Types.ObjectId(user._id),
+          email: user.email,
+        },
+      },
+      { new: true }
+    ).exec();
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<any> {
     if (!isValidObjectId(id)) {
       throw new NotFoundException('Invalid company id');
     }

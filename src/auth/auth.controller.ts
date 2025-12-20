@@ -38,7 +38,7 @@ export class AuthController {
     ) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         const data = await this.authService.login(req.user, response);
-        await this.userService.updateUserToken(data.refreshToken, data._id);
+        await this.userService.updateUserToken(data.refreshToken, data.user._id);
         response.cookie('refreshToken', data.refreshToken, {
             httpOnly: true,
             maxAge: ms('7d')
@@ -48,11 +48,7 @@ export class AuthController {
             message: 'User Login',
             data: {
                 access_token: data.access_token,
-                user: {
-                    _id: data._id,
-                    name: data.name,
-                    email: data.email
-                }
+                user: data.user
             }
         };
     }
@@ -68,7 +64,8 @@ export class AuthController {
                     _id: user._id,
                     name: user.name,
                     email: user.email,
-                    role: user.role
+                    role: user.role,
+                    permissions: user.role?.permissions || []
                 }
             }
         };

@@ -54,7 +54,7 @@ export class JobsService {
     return result;
   }
 
-  async remove(id: string, user: IUser) {
+  async remove(id: string, user: IUser): Promise<any> {
     await this.jobModel.updateOne(
       { _id: id },
       {
