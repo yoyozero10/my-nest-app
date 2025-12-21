@@ -108,17 +108,34 @@ export class UsersService {
   async findOneByEmail(email: string) {
     const user = await this.userModel
       .findOne({ email })
-      .populate({
-        path: 'role',
-        populate: {
-          path: 'permissions',
-          select: '_id name apiPath module method'
-        }
-      })
       .lean();
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    // Chỉ populate nếu role là ObjectId (không phải string)
+    if (user.role && typeof user.role === 'object') {
+      try {
+        const populatedUser = await this.userModel
+          .findById(user._id)
+          .populate({
+            path: 'role',
+            populate: {
+              path: 'permissions',
+              select: '_id name apiPath module method'
+            }
+          })
+          .lean();
+        return populatedUser;
+      } catch (error) {
+        // Nếu populate fail, trả về user không populate
+        console.warn('Failed to populate role:', error.message);
+        return user;
+      }
+    }
+
+    // Nếu role là string (legacy data), trả về user như cũ
     return user;
   }
 

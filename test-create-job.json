@@ -1,0 +1,19 @@
+{
+    "name": "Test Job - Created by Permission Test",
+    "skills": [
+        "Node.js",
+        "NestJS",
+        "TypeScript"
+    ],
+    "company": {
+        "_id": "676692bdbd6c11502ef1db79",
+        "name": "FPT Software"
+    },
+    "salary": 25000000,
+    "quantity": 2,
+    "level": "MIDDLE",
+    "description": "This is a test job to verify permissions are working correctly",
+    "startDate": "2025-01-15T00:00:00.000Z",
+    "endDate": "2025-04-15T00:00:00.000Z",
+    "isActive": true
+}

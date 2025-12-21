@@ -40,6 +40,45 @@ export class DatabasesService implements OnModuleInit {
         }
     }
 
+    async dropDatabase() {
+        this.logger.log('>>> START DROPPING DATABASE');
+
+        // Xóa tất cả collections
+        await this.permissionModel.deleteMany({});
+        this.logger.log('>>> Deleted all permissions');
+
+        await this.roleModel.deleteMany({});
+        this.logger.log('>>> Deleted all roles');
+
+        await this.userModel.deleteMany({});
+        this.logger.log('>>> Deleted all users');
+
+        await this.companyModel.deleteMany({});
+        this.logger.log('>>> Deleted all companies');
+
+        await this.jobModel.deleteMany({});
+        this.logger.log('>>> Deleted all jobs');
+
+        await this.resumeModel.deleteMany({});
+        this.logger.log('>>> Deleted all resumes');
+
+        this.logger.log('>>> DATABASE DROPPED SUCCESSFULLY');
+
+        // Seed lại dữ liệu
+        this.logger.log('>>> START SEEDING DATABASE');
+        await this.initPermissions();
+        await this.initRoles();
+        await this.initUsers();
+        await this.initCompanies();
+        await this.initJobs();
+        await this.initResumes();
+        this.logger.log('>>> DATABASE SEEDED SUCCESSFULLY');
+
+        return {
+            message: 'Database dropped and seeded successfully'
+        };
+    }
+
     async initPermissions() {
         this.logger.log('>>> START INIT PERMISSIONS');
 
@@ -98,23 +137,21 @@ export class DatabasesService implements OnModuleInit {
     async initRoles() {
         this.logger.log('>>> START INIT ROLES');
 
-        const permissions = await this.permissionModel.find({}).select('_id name').lean();
+        const permissions = await this.permissionModel.find({}).select('_id name module method').lean();
 
         // ADMIN - Full permissions
         const adminPermissions = permissions.map(p => p._id);
 
         // HR - Manage jobs, resumes, companies
         const hrPermissions = permissions
-            .filter(p => ['JOBS', 'RESUMES', 'COMPANIES'].includes(p.name.split(' ').pop() || ''))
+            .filter(p => ['JOBS', 'RESUMES', 'COMPANIES'].includes(p.module))
             .map(p => p._id);
 
         // USER - View jobs, create/view own resumes
         const userPermissions = permissions
             .filter(p =>
-                p.name.includes('Get Jobs') ||
-                p.name.includes('Get Job by ID') ||
-                p.name.includes('Create Resume') ||
-                p.name.includes('Get Resumes by User')
+                (p.module === 'JOBS' && p.method === 'GET') ||
+                (p.module === 'RESUMES' && (p.method === 'POST' || p.name === 'Get Resumes by User'))
             )
             .map(p => p._id);
 
@@ -149,6 +186,11 @@ export class DatabasesService implements OnModuleInit {
         // Hash password mặc định: 123456
         const defaultPassword = bcrypt.hashSync('123456', 10);
 
+        // Lấy roles từ database
+        const adminRole = await this.roleModel.findOne({ name: 'ADMIN' }).lean();
+        const hrRole = await this.roleModel.findOne({ name: 'HR' }).lean();
+        const userRole = await this.roleModel.findOne({ name: 'USER' }).lean();
+
         const users = [
             // ADMIN Users
             {
@@ -158,7 +200,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 30,
                 gender: 'Male',
                 address: 'Hà Nội, Việt Nam',
-                role: 'ADMIN',
+                role: adminRole?._id,
             },
             {
                 email: 'superadmin@gmail.com',
@@ -167,7 +209,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 35,
                 gender: 'Male',
                 address: 'Hồ Chí Minh, Việt Nam',
-                role: 'ADMIN',
+                role: adminRole?._id,
             },
 
             // HR Users
@@ -178,7 +220,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 28,
                 gender: 'Male',
                 address: 'Đà Nẵng, Việt Nam',
-                role: 'HR',
+                role: hrRole?._id,
             },
             {
                 email: 'hr2@gmail.com',
@@ -187,7 +229,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 26,
                 gender: 'Female',
                 address: 'Hải Phòng, Việt Nam',
-                role: 'HR',
+                role: hrRole?._id,
             },
             {
                 email: 'hr.manager@gmail.com',
@@ -196,7 +238,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 32,
                 gender: 'Male',
                 address: 'Cần Thơ, Việt Nam',
-                role: 'HR',
+                role: hrRole?._id,
             },
 
             // Normal Users
@@ -207,7 +249,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 24,
                 gender: 'Male',
                 address: 'Hà Nội, Việt Nam',
-                role: 'USER',
+                role: userRole?._id,
             },
             {
                 email: 'user2@gmail.com',
@@ -216,7 +258,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 23,
                 gender: 'Female',
                 address: 'Hồ Chí Minh, Việt Nam',
-                role: 'USER',
+                role: userRole?._id,
             },
             {
                 email: 'user3@gmail.com',
@@ -225,7 +267,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 25,
                 gender: 'Male',
                 address: 'Đà Nẵng, Việt Nam',
-                role: 'USER',
+                role: userRole?._id,
             },
             {
                 email: 'user4@gmail.com',
@@ -234,7 +276,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 22,
                 gender: 'Female',
                 address: 'Nha Trang, Việt Nam',
-                role: 'USER',
+                role: userRole?._id,
             },
             {
                 email: 'user5@gmail.com',
@@ -243,7 +285,7 @@ export class DatabasesService implements OnModuleInit {
                 age: 27,
                 gender: 'Male',
                 address: 'Huế, Việt Nam',
-                role: 'USER',
+                role: userRole?._id,
             },
         ];
 
@@ -463,8 +505,11 @@ export class DatabasesService implements OnModuleInit {
     async initResumes() {
         this.logger.log('>>> START INIT RESUMES');
 
+        // Lấy role USER
+        const userRole = await this.roleModel.findOne({ name: 'USER' }).lean();
+
         // Lấy users, companies và jobs
-        const users = await this.userModel.find({ role: 'USER' }).lean();
+        const users = await this.userModel.find({ role: userRole?._id }).lean();
         const companies = await this.companyModel.find().lean();
         const jobs = await this.jobModel.find().lean();
 

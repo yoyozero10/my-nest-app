@@ -24,13 +24,18 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/require-await
     async login(user: IUser, response: Response) {
         const { _id, name, email, role } = user;
+
+        // Extract permissions từ role để lưu vào JWT
+        const permissions = role?.permissions || [];
+
         const payload = {
             sub: "token login",
             iss: "from server",
             _id,
             name,
             email,
-            role
+            role,
+            permissions // Thêm permissions vào payload
         };
 
         // Create refresh token with different payload
@@ -56,7 +61,7 @@ export class AuthService {
                 name,
                 email,
                 role,
-                permissions: role?.permissions || []
+                permissions
             }
         };
     }
@@ -100,6 +105,9 @@ export class AuthService {
             // Find user from database
             const user = await this.usersService.findOne(payload._id) as any;
 
+            // Extract permissions từ role
+            const permissions = user.role?.permissions || [];
+
             // Create new access token
             const accessTokenPayload = {
                 sub: "token login",
@@ -108,6 +116,7 @@ export class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                permissions, // Thêm permissions vào payload
                 type: 'access'
             };
             // Create new refresh token with fresh user data
@@ -118,6 +127,7 @@ export class AuthService {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                permissions, // Thêm permissions vào payload
                 type: 'refresh'
             };
 
@@ -136,7 +146,7 @@ export class AuthService {
                     name: user.name,
                     email: user.email,
                     role: user.role,
-                    permissions: user.role?.permissions || []
+                    permissions
                 }
             };
         } catch (error) {

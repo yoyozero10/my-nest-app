@@ -12,7 +12,6 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) { }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Create a new job')
   async create(
     @Body() createJobDto: CreateJobDto,
@@ -27,14 +26,12 @@ export class JobsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Fetch a job by id')
   async findOne(@Param('id') id: string) {
     return await this.jobsService.findOne(id);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Update a job')
   async update(
     @Param('id') id: string,
@@ -45,7 +42,6 @@ export class JobsController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   @ResponseMessage('Delete a job')
   async remove(
     @Param('id') id: string,

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { DatabasesService } from './databases.service';
+import { DatabasesController } from './databases.controller';
 import { Permission, PermissionSchema } from 'src/permissions/schemas/permission.schema';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
@@ -19,6 +20,7 @@ import { Resume, ResumeSchema } from 'src/resumes/schemas/resume.schema';
             { name: Resume.name, schema: ResumeSchema },
         ]),
     ],
+    controllers: [DatabasesController],
     providers: [DatabasesService],
 })
 export class DatabasesModule { }

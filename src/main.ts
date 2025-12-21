@@ -5,6 +5,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { PermissionGuard } from './auth/permission.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
 import { VersioningType } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
@@ -13,7 +14,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflection = app.get(Reflector);
+
+  // Apply guards in order: JwtAuthGuard first, then PermissionGuard
   app.useGlobalGuards(new JwtAuthGuard(reflection));
+  app.useGlobalGuards(new PermissionGuard(reflection));
+
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');

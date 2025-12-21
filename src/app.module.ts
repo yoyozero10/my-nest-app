@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -15,6 +16,8 @@ import { ResumesModule } from './resumes/resumes.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
 import { DatabasesModule } from './databases/databases.module';
+import { DebugModule } from './debug/debug.module';
+import { PermissionGuard } from './auth/permission.guard';
 
 @Module({
   imports: [
@@ -41,9 +44,10 @@ import { DatabasesModule } from './databases/databases.module';
     PermissionsModule,
     RolesModule,
     DatabasesModule,
+    DebugModule,
   ],
   providers: [
-    AppService
+    AppService,
   ],
 
   controllers: [AppController],
