@@ -18,6 +18,8 @@ import { RolesModule } from './roles/roles.module';
 import { DatabasesModule } from './databases/databases.module';
 import { DebugModule } from './debug/debug.module';
 import { PermissionGuard } from './auth/permission.guard';
+import { SubscribersModule } from './subscribers/subscribers.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { PermissionGuard } from './auth/permission.guard';
     RolesModule,
     DatabasesModule,
     DebugModule,
+    SubscribersModule,
+    MailModule,
   ],
   providers: [
     AppService,
